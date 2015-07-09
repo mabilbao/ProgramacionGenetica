@@ -18,10 +18,11 @@ import arboles.Arbol;
 
 public class Main {
 	
-	public static int PASADAS = 100;
+	public static int PASADAS = 2000;
 	public static int NIVELES_DE_ARBOL = 3;
-	public static int CANTIDAD_DE_ARBOL = 25;
-	public static int CANTIDAD_A_MUTAR = 10;
+	public static int CANTIDAD_DE_ARBOL = 100;
+	public static int CANTIDAD_A_MUTAR = 25;
+	public static String ARCHIVO = "dolar-venta.csv";
 	
 	private static Double[] x;
 	private static Double[] y;
@@ -50,7 +51,10 @@ public class Main {
 			Main.arrayArboles = operacion.generarArboles();
 			
 			//Lectura de Archivo
-			parsearFile();
+			parsearFile();			
+			
+			//Grafico del Archivo
+			Grafico.dibujar( "Programacion Genetica", "Regresion - File ingresado.", Main.x, Main.y );
 			
 			for( int pasadas = 0 ; pasadas < PASADAS ; pasadas++ ){
 				System.out.println("PASADA: " + pasadas);
@@ -87,7 +91,7 @@ public class Main {
 					"\r\n\r\nDICHA CORRELACION FUE OBTENIDA EN LA PASADA: " + mejorPasada;
 			System.out.println(fin);
 			writer.write(fin);
-
+			
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (FileNotFoundException e) {
@@ -103,7 +107,7 @@ public class Main {
 
 	public static void parsearFile() {
 		 
-		String csvFile = "example.csv";
+		String csvFile = Main.ARCHIVO;
 		BufferedReader br = null;
 		String linea = "";
 		String cvsSplitBy = "\\|";
@@ -146,7 +150,7 @@ public class Main {
 		}
 	}
 
-	public static void test(){
+	public static void testPearson(){
 		
 		System.out.println("***********************************************************");
 		System.out.println("***********************************************************");
@@ -181,6 +185,17 @@ public class Main {
 		System.out.println("Resultado: " + operacion.getPearsonCorrelation(Main.x, Main.y, a));
 	}
 	
+	public static void testMutar() throws CloneNotSupportedException{
+		
+		Operacion o = new Operacion();
+		Arbol a = o.generarArbol(0, Main.NIVELES_DE_ARBOL);
+		Arbol b = (a).clone();
+		o.mutar( b, Main.NIVELES_DE_ARBOL-1 );
+		
+		System.out.println("A: " + a.toString());
+		System.out.println("B: " + b.toString());
+		System.out.println("RESOLUCION B: " + o.getPearsonCorrelation(Main.x, Main.y, b));
+	}
 	
 	public static Double[] getX() {
 		return x;

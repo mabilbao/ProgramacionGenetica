@@ -13,15 +13,15 @@ public class Operacion {
 		Arbol[] arrayArboles = new Arbol[Main.CANTIDAD_DE_ARBOL];
 	
 		for (int i = 0 ; i < arrayArboles.length ; i++) {
-			arrayArboles[i] = generarArbol();
+			arrayArboles[i] = generarArbol(0, Main.NIVELES_DE_ARBOL);
 		}
 		
 		return arrayArboles;
 	}
 	
-	public Arbol generarArbol(){
+	public Arbol generarArbol(int numero, int niveles){
 		Arbol a = new Arbol();
-		return this.generarArbol(a, 0, Main.NIVELES_DE_ARBOL);
+		return this.generarArbol(a, 0, niveles);
 	}
 	
 	private Arbol generarArbol(Arbol a, int numero, int niveles){
@@ -87,25 +87,27 @@ public class Operacion {
 	public void mutarResultados( Arbol[] arrayArboles ) throws CloneNotSupportedException{
 		int i = 0;
 		for (int j = 0 ; j < Main.arrayArboles.length ; j++) {
-			if ( Main.arrayArboles[j].getPearson() == 0 ){
-				Main.arrayArboles[j] = generarArbol();
-			}else{
-				if ( i <= Main.CANTIDAD_A_MUTAR ){
-					i++;
-					arrayArboles[j] = mutar( (arrayArboles[arrayArboles.length - (1 + j) ]).clone() );
-				}
+			if ( i <= Main.CANTIDAD_A_MUTAR ){
+				i++;
+				Arbol b = (arrayArboles[(arrayArboles.length - 1) - i]).clone();
+				arrayArboles[j] = null;
+				mutar( b, (Main.NIVELES_DE_ARBOL-1) );
+				b.setPearson((double) 0);
+				arrayArboles[j] = b;
 			}
 		}
 	}
 	
-	private Arbol mutar( Arbol a ){
+	public Arbol mutar( Arbol a, int niveles ){
 		Random randomGenerator = new Random();
 		Double random = randomGenerator.nextDouble();
-	
+		Arbol b = generarArbol(0, niveles);
+		
+		System.out.println("Mutacion: " + b.toString());
 		if ( random < 0.5 ){
-			a.setIzq( generarArbol(a.getIzq(), 0, 2));
+			a.setIzq( b );
 		}else{
-			a.setDer( generarArbol(a.getDer(), 0, 2));
+			a.setDer( b );
 		}
 	
 		return a;

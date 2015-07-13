@@ -2,10 +2,12 @@ package main;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -13,22 +15,26 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Properties;
 
 import arboles.Arbol;
 
 public class Main {
 	
-	public static int PASADAS = 2000;
-	public static int NIVELES_DE_ARBOL = 3;
-	public static int CANTIDAD_DE_ARBOL = 100;
-	public static int CANTIDAD_A_MUTAR = 25;
-	public static String ARCHIVO = "dolar-venta.csv";
+	public static int PASADAS;
+	public static int NIVELES_DE_ARBOL;
+	public static int CANTIDAD_DE_ARBOL;
+	public static int CANTIDAD_A_MUTAR;
+	public static String RUTA_ARCHIVO;
+	public static String NOMBRE_ARCHIVO;
+	public static String RUTA_LOGS;
 	
 	private static Double[] x;
 	private static Double[] y;
 	static Arbol[] arrayArboles = new Arbol[1000];
 		
-	public static void main(String[] args) throws CloneNotSupportedException {
+	public static void main(String[] args) throws CloneNotSupportedException, FileNotFoundException {
+		
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss");
 		Date date = new Date();
@@ -41,8 +47,10 @@ public class Main {
 		Double mejorPearson = (double) 0;
 		
 		try {
+			cargarPropiedades();
+			
 			writer = new BufferedWriter(new OutputStreamWriter(
-					new FileOutputStream("logs/log-" + dateFormat.format(date) +".log"), "utf-8")
+					new FileOutputStream( Main.RUTA_LOGS + "log-" + dateFormat.format(date) +".log"), "utf-8")
 			);
 			
 			writer.write("Bienvenido a Programacion genetica!\r\n");
@@ -53,12 +61,19 @@ public class Main {
 			//Lectura de Archivo
 			parsearFile();			
 			
+			//Tests
+//			Test.testCalculadora();
+//			Test.testPearson();
+//			Test.testMutar();
+//			System.exit(1);
+			
 			//Grafico del Archivo
 			Grafico.dibujar( "Programacion Genetica", "Regresion - File ingresado.", Main.x, Main.y );
 			
 			for( int pasadas = 0 ; pasadas < PASADAS ; pasadas++ ){
-				System.out.println("PASADA: " + pasadas);
-				writer.write("PASADA: " + pasadas + "\r\n");
+				
+				System.out.println("GENERACION: " + pasadas);
+				writer.write("GENERACION: " + pasadas + "\r\n");
 				
 				//Calcular Pearson para cada Arbol
 				for (Arbol a : Main.arrayArboles) {
@@ -78,6 +93,8 @@ public class Main {
 				if ( mejorPearson < Main.arrayArboles[Main.arrayArboles.length - 1].getPearson() ){
 					mejorPearson = Main.arrayArboles[Main.arrayArboles.length - 1].getPearson();
 					mejorPasada = pasadas;
+					System.out.println("NUEVA FORMULA MAS OPTIMA: " + Main.arrayArboles[Main.arrayArboles.length - 1].toString() +
+					"\r\n - PEARSON: " + Main.arrayArboles[Main.arrayArboles.length - 1].getPearson());
 				}
 				
 				// Muto los mejores arboles y refabrico arboles para las poblaciones fallidas
@@ -107,7 +124,7 @@ public class Main {
 
 	public static void parsearFile() {
 		 
-		String csvFile = Main.ARCHIVO;
+		String csvFile = Main.RUTA_ARCHIVO + Main.NOMBRE_ARCHIVO;
 		BufferedReader br = null;
 		String linea = "";
 		String cvsSplitBy = "\\|";
@@ -131,9 +148,9 @@ public class Main {
 			x.toArray(Main.x);
 			y.toArray(Main.y);
 			
-			/*for (String[] funcion : entradas) {
-				System.out.println("[X= " + funcion[0] + " , Y=" + funcion[1] + "]");
-			}*/
+//			for (String[] funcion : entradas) {
+//				System.out.println("[X= " + funcion[0] + " , Y=" + funcion[1] + "]");
+//			}
 	 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -149,52 +166,25 @@ public class Main {
 			}
 		}
 	}
-
-	public static void testPearson(){
-		
-		System.out.println("***********************************************************");
-		System.out.println("***********************************************************");
-		System.out.println("***********************************************************");
-		
-		Operacion operacion = new Operacion();
-		
-		//(* (/ (0.9568404858476679)(null))(+ (0.8612044761646538)(0.02273167680519772)))
-		
-		Arbol a = new Arbol();
-		Arbol i = new Arbol();
-		Arbol d = new Arbol();
-		
-		a.setValor("*");
-		
-		i.setValor("/");
-		i.setIzq(new Arbol());
-		i.getIzq().setValor("0.9568404858476679");
-		i.setDer(new Arbol());
-		i.getDer().setValor(null);
-		
-		d.setValor("+");
-		d.setIzq(new Arbol());
-		d.getIzq().setValor("0.8612044761646538");
-		d.setDer(new Arbol());
-		d.getDer().setValor("0.02273167680519772");
-		
-		a.setIzq(i);
-		a.setDer(d);
-		
-		System.out.println( a.toString() );
-		System.out.println("Resultado: " + operacion.getPearsonCorrelation(Main.x, Main.y, a));
-	}
 	
-	public static void testMutar() throws CloneNotSupportedException{
+	private static void cargarPropiedades() throws IOException {
+		Properties propiedades = new Properties();
+	    InputStream entrada = null;
+	    
+	    try{
+	    	entrada = new FileInputStream("../configuracion.properties");
+	    }catch( FileNotFoundException e ){
+	    	entrada = new FileInputStream("configuracion.properties");
+	    }
+		propiedades.load(entrada);
 		
-		Operacion o = new Operacion();
-		Arbol a = o.generarArbol(0, Main.NIVELES_DE_ARBOL);
-		Arbol b = (a).clone();
-		o.mutar( b, Main.NIVELES_DE_ARBOL-1 );
-		
-		System.out.println("A: " + a.toString());
-		System.out.println("B: " + b.toString());
-		System.out.println("RESOLUCION B: " + o.getPearsonCorrelation(Main.x, Main.y, b));
+		Main.PASADAS = Integer.parseInt(propiedades.getProperty("PASADAS"));
+		Main.NIVELES_DE_ARBOL = Integer.parseInt(propiedades.getProperty("NIVELES_DE_ARBOL"));
+		Main.CANTIDAD_DE_ARBOL = Integer.parseInt(propiedades.getProperty("CANTIDAD_DE_ARBOL"));
+		Main.CANTIDAD_A_MUTAR = Integer.parseInt(propiedades.getProperty("CANTIDAD_A_MUTAR"));
+		Main.RUTA_ARCHIVO = propiedades.getProperty("RUTA_ARCHIVO");
+		Main.NOMBRE_ARCHIVO = propiedades.getProperty("NOMBRE_ARCHIVO");
+		Main.RUTA_LOGS = propiedades.getProperty("RUTA_LOGS");
 	}
 	
 	public static Double[] getX() {

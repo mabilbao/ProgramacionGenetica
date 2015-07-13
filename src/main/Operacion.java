@@ -36,8 +36,12 @@ public class Operacion {
 				a.setValor( obtenerOperadorSimple() );
 			}
 			
+			if ( a.getIzq().getValor() == "X" && a.getDer().getValor() == "X" ){
+				a.getIzq().setValor( obtenerTerminal( false ) );
+			}
+			
 		}else{
-			a.setValor( obtenerTerminal() );
+			a.setValor( obtenerTerminal( true ) );
 			a.setIzq( null );
 			a.setDer( null );
 		}
@@ -60,15 +64,32 @@ public class Operacion {
 		return Operador.OPERADORES_SIMPLES[numero];
 	}
 	
-	private String obtenerTerminal(){
+	private String obtenerTerminal( boolean conX ){
 		Random randomGenerator = new Random();
-		int numero;
+
+//		int numero;
+//		numero = randomGenerator.nextInt(Operador.TERMINALES.length);
+//		if ( Operador.TERMINALES[numero] == "=" ){
+//			return String.valueOf(randomGenerator.nextDouble());
+//		}else{
+//			return Operador.TERMINALES[numero];
+//		}
 		
-		numero = randomGenerator.nextInt(Operador.TERMINALES.length);
-		if ( Operador.TERMINALES[numero] == "=" ){
-			return String.valueOf(randomGenerator.nextDouble());
+		Double numero = randomGenerator.nextDouble();
+		if ( conX ) {
+			if ( numero < 0.21 ){
+				return Operador.X;
+			}else if ( numero > 0.8 ){
+				return Operador.NUL;
+			}else{
+				return String.valueOf(randomGenerator.nextDouble());
+			}
 		}else{
-			return Operador.TERMINALES[numero];
+			if ( numero > 0.7 ){
+				return Operador.NUL;
+			}else{
+				return String.valueOf(randomGenerator.nextDouble());
+			}
 		}
 	}
 
@@ -103,7 +124,7 @@ public class Operacion {
 		Double random = randomGenerator.nextDouble();
 		Arbol b = generarArbol(0, niveles);
 		
-		System.out.println("Mutacion: " + b.toString());
+//		System.out.println("Mutacion: " + b.toString());
 		if ( random < 0.5 ){
 			a.setIzq( b );
 		}else{
